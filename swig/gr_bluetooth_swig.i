@@ -4,18 +4,8 @@
 
 %include "gnuradio.i"			// the common stuff
 
-#ifndef GR_SWIG_BLOCK_MAGIC2
-%define GR_SWIG_BLOCK_MAGIC2(PKG, BASE_NAME)
-%template(BASE_NAME ## _sptr) boost::shared_ptr<gr:: ## PKG ## :: ## BASE_NAME>;
-%pythoncode %{
-BASE_NAME ## _sptr.__repr__ = lambda self: "<gr_block %s (%d)>" % (self.name(), self.unique_id())
-BASE_NAME = BASE_NAME.make;
-%}
-%enddef
-#endif
-
 //load generated python docstrings
-%include "gr_bluetooth_doc.i"
+%include "gr_bluetooth_swig_doc.i"
 
 %{
 #include "gr_bluetooth/packet.h"

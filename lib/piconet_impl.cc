@@ -27,7 +27,7 @@
 #include "config.h"
 #endif
 
-#include <gr_io_signature.h>
+#include <gnuradio/io_signature.h>
 #include "piconet_impl.h"
 #include <stdio.h>
 
@@ -42,7 +42,7 @@ namespace gr {
     /* pull the first packet from the queue (FIFO) */
     packet::sptr piconet::dequeue( ) {
       packet::sptr pkt;
-      
+
       if (d_pkt_queue.size() > 0) {
         pkt = d_pkt_queue.front();
         d_pkt_queue.erase(d_pkt_queue.begin());

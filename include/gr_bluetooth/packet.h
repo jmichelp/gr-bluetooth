@@ -1,22 +1,22 @@
 /* -*- c++ -*- */
-/* 
+/*
  * Copyright 2013 Christopher D. Kilgour
  * Copyright 2008, 2009 Dominic Spill, Michael Ossmann
  * Copyright 2007 Dominic Spill
  * Copyright 2005, 2006 Free Software Foundation, Inc.
- * 
+ *
  * This file is part of gr-bluetooth
- * 
+ *
  * This is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; either version 2, or (at your option)
  * any later version.
- * 
+ *
  * This software is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with this software; see the file COPYING.  If not, write to
  * the Free Software Foundation, Inc., 51 Franklin Street,
@@ -28,7 +28,7 @@
 #define INCLUDED_GR_BLUETOOTH_PACKET_H
 
 #include <gr_bluetooth/api.h>
-#include <gr_sync_block.h>
+#include <gnuradio/sync_block.h>
 #include <string>
 
 namespace gr {
@@ -40,7 +40,7 @@ namespace gr {
       friend class classic_packet_impl;
       friend class le_packet;
       friend class le_packet_impl;
-      
+
     public:
       typedef enum {
         UNKNOWN = 0,
@@ -62,7 +62,7 @@ namespace gr {
       //FIXME maybe this should be a vector so we can grow it only to the size
       //needed and later shrink it if we find we have more symbols than necessary
       char d_symbols[MAX_SYMBOLS];
-      
+
       /* packet type */
       int d_packet_type;
 
@@ -82,7 +82,7 @@ namespace gr {
        * problematic in the short run.
        */
       char d_payload[2744];
-      
+
       /* is the packet whitened? */
       bool d_whitened;
 
@@ -113,7 +113,7 @@ namespace gr {
       static uint16_t air_to_host16(char *air_order, int bits);
       static uint32_t air_to_host32(char *air_order, int bits);
       // hmmm, maybe these should have pointer output so they can be overloaded
-      
+
       /* Convert some number of bits in a host order integer to an air order array */
       static void host_to_air(uint8_t host_order, char *air_order, int bits);
 
@@ -130,7 +130,7 @@ namespace gr {
 
       /* have we decoded the payload yet? */
       bool got_payload();
-      
+
       int get_type();
 
       /* decode the whole packet */
@@ -140,13 +140,13 @@ namespace gr {
 
       /* decode the packet header */
       virtual bool decode_header() = 0;
-      
+
       /* decode the packet header */
       virtual void decode_payload() = 0;
-            
+
       /* print packet information */
       virtual void print() = 0;
-      
+
       /* format payload for tun interface */
       virtual char *tun_format() = 0;
 
@@ -233,13 +233,13 @@ namespace gr {
 
       /* decode the classic packet header */
       virtual bool decode_header() = 0;
-        
+
       /* decode the classic packet header */
       virtual void decode_payload() = 0;
-        
+
       /* print classic packet information */
       virtual void print() = 0;
-        
+
       /* format payload for tun interface */
       virtual char *tun_format() = 0;
 
@@ -324,16 +324,16 @@ namespace gr {
 
       /* decode the packet header */
       virtual bool decode_header() = 0;
-       
+
       /* decode the packet header */
       virtual void decode_payload() = 0;
-             
+
       /* print packet information */
       virtual void print() = 0;
-       
+
       /* format payload for tun interface */
       virtual char *tun_format() = 0;
-       
+
       /* check to see if the packet has a header */
       virtual bool header_present() = 0;
 

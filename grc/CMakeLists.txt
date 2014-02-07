@@ -23,6 +23,5 @@ install(FILES
     gr_bluetooth_multi_LAP.xml
     gr_bluetooth_multi_sniffer.xml
     gr_bluetooth_multi_UAP.xml
-    gr_bluetooth_packet.xml
-    gr_bluetooth_piconet.xml DESTINATION share/gnuradio/grc/blocks
+    DESTINATION share/gnuradio/grc/blocks
 )

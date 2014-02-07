@@ -1,22 +1,22 @@
 /* -*- c++ -*- */
-/* 
+/*
  * Copyright 2013 Christopher D. Kilgour
  * Copyright 2008, 2009 Dominic Spill, Michael Ossmann
  * Copyright 2007 Dominic Spill
  * Copyright 2005, 2006 Free Software Foundation, Inc.
- * 
+ *
  * This file is part of gr-bluetooth
- * 
+ *
  * This is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; either version 2, or (at your option)
  * any later version.
- * 
+ *
  * This software is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with this software; see the file COPYING.  If not, write to
  * the Free Software Foundation, Inc., 51 Franklin Street,
@@ -27,7 +27,7 @@
 #include "config.h"
 #endif
 
-#include <gr_io_signature.h>
+#include <gnuradio/io_signature.h>
 #include "multi_sniffer_impl.h"
 
 namespace gr {
@@ -37,7 +37,7 @@ namespace gr {
     multi_sniffer::make(double sample_rate, double center_freq,
                         double squelch_threshold, bool tun)
     {
-      return gnuradio::get_initial_sptr (new multi_sniffer_impl(sample_rate, center_freq, 
+      return gnuradio::get_initial_sptr (new multi_sniffer_impl(sample_rate, center_freq,
                                                                 squelch_threshold, tun));
     }
 
@@ -47,9 +47,9 @@ namespace gr {
     multi_sniffer_impl::multi_sniffer_impl(double sample_rate, double center_freq,
                                            double squelch_threshold, bool tun)
       : multi_block(sample_rate, center_freq, squelch_threshold),
-        gr_sync_block ("bluetooth multi sniffer block",
-                       gr_make_io_signature (1, 1, sizeof (gr_complex)),
-                       gr_make_io_signature (0, 0, 0))
+        gr::sync_block ("bluetooth multi sniffer block",
+                       gr::io_signature::make (1, 1, sizeof (gr_complex)),
+                       gr::io_signature::make (0, 0, 0))
     {
       d_tun = tun;
       set_symbol_history(SYMBOLS_FOR_BASIC_RATE_HISTORY);
@@ -78,7 +78,7 @@ namespace gr {
                               gr_vector_const_void_star& input_items,
                               gr_vector_void_star&       output_items )
     {
-      for (double freq = d_low_freq; freq <= d_high_freq; freq += 1e6) {   
+      for (double freq = d_low_freq; freq <= d_high_freq; freq += 1e6) {
         gr_complex ch_samples[noutput_items];
         gr_vector_void_star btch( 1 );
         btch[0] = ch_samples;
@@ -95,11 +95,11 @@ namespace gr {
           gr_vector_const_void_star cbtch( 1 );
           cbtch[0] = ch_samples;
           int len = channel_symbols( cbtch, symbols, ch_count );
-          
+
           if (brok) {
-            int limit = ((len - SYMBOLS_PER_BASIC_RATE_SHORTENED_ACCESS_CODE) < SYMBOLS_PER_BASIC_RATE_SLOT) ? 
+            int limit = ((len - SYMBOLS_PER_BASIC_RATE_SHORTENED_ACCESS_CODE) < SYMBOLS_PER_BASIC_RATE_SLOT) ?
               (len - SYMBOLS_PER_BASIC_RATE_SHORTENED_ACCESS_CODE) : SYMBOLS_PER_BASIC_RATE_SLOT;
-        
+
             /* look for multiple packets in this slot */
             while (limit >= 0) {
               /* index to start of packet */
@@ -110,7 +110,7 @@ namespace gr {
                 len   -= step;
                 symp   = &symp[step];
                 limit -= step;
-              } 
+              }
               else {
                 break;
               }
@@ -119,7 +119,7 @@ namespace gr {
 
           if (leok) {
             symp = symbols;
-            int limit = ((len - SYMBOLS_PER_BASIC_RATE_SHORTENED_ACCESS_CODE) < SYMBOLS_PER_BASIC_RATE_SLOT) ? 
+            int limit = ((len - SYMBOLS_PER_BASIC_RATE_SHORTENED_ACCESS_CODE) < SYMBOLS_PER_BASIC_RATE_SLOT) ?
               (len - SYMBOLS_PER_BASIC_RATE_SHORTENED_ACCESS_CODE) : SYMBOLS_PER_BASIC_RATE_SLOT;
 
             while (limit >= 0) {
@@ -136,11 +136,12 @@ namespace gr {
               }
             }
           }
+
         }
       }
       d_cumulative_count += (int) d_samples_per_slot;
-      
-      /* 
+
+      /*
        * The runtime system wants to know how many output items we
        * produced, assuming that this is equal to the number of input
        * items consumed.  We tell it that we produced/consumed one
@@ -151,15 +152,15 @@ namespace gr {
     }
 
     /* handle AC */
-    void 
+    void
     multi_sniffer_impl::ac(char *symbols, int len, double freq, double snr)
     {
-      /* native (local) clock in 625 us */	
+      /* native (local) clock in 625 us */
       uint32_t clkn = (int) (d_cumulative_count / d_samples_per_slot) & 0x7ffffff;
       classic_packet::sptr pkt = classic_packet::make(symbols, len, clkn, freq);
       uint32_t lap = pkt->get_LAP();
 
-      printf("time %6d, snr=%.1f, channel %2d, LAP %06x ", 
+      printf("time %6d, snr=%.1f, channel %2d, LAP %06x ",
              clkn, snr, pkt->get_channel( ), lap);
 
       if (pkt->header_present()) {
@@ -170,7 +171,7 @@ namespace gr {
 
         if (pn->have_clk6() && pn->have_UAP()) {
           decode(pkt, pn, true);
-        } 
+        }
         else {
           discover(pkt, pn);
         }
@@ -182,7 +183,7 @@ namespace gr {
         if (lap == GIAC || lap == LIAC) {
           d_basic_rate_piconets.erase(lap);
         }
-      } 
+      }
       else {
         id(lap);
       }
@@ -221,7 +222,7 @@ namespace gr {
 
     /* decode packets with headers */
     void multi_sniffer_impl::decode(classic_packet::sptr pkt,
-                                    basic_rate_piconet::sptr pn, 
+                                    basic_rate_piconet::sptr pn,
                                     bool first_run)
     {
       uint32_t clock; /* CLK of target piconet */
@@ -263,9 +264,9 @@ namespace gr {
       }
     }
 
-    void multi_sniffer_impl::decode(le_packet::sptr pkt, 
+    void multi_sniffer_impl::decode(le_packet::sptr pkt,
                                     low_energy_piconet::sptr pn) {
-      
+
     }
 
     /* work on UAP/CLK1-6 discovery */
@@ -282,7 +283,7 @@ namespace gr {
         recall(pn);
     }
 
-    void multi_sniffer_impl::discover(le_packet::sptr pkt, 
+    void multi_sniffer_impl::discover(le_packet::sptr pkt,
                                       low_energy_piconet::sptr pn) {
     }
 
@@ -291,14 +292,14 @@ namespace gr {
     {
       packet::sptr pkt;
       printf("Decoding queued packets\n");
-      
+
       while (pkt = pn->dequeue()) {
         classic_packet::sptr cpkt = boost::dynamic_pointer_cast<classic_packet>(pkt);
         printf("time %6d, channel %2d, LAP %06x ", cpkt->d_clkn,
                cpkt->get_channel(), cpkt->get_LAP());
         decode(cpkt, pn, false);
       }
-      
+
       printf("Finished decoding queued packets\n");
     }
 
@@ -341,12 +342,12 @@ namespace gr {
         d_basic_rate_piconets[lap] = basic_rate_piconet::make(lap);
       }
       pn = d_basic_rate_piconets[lap];
-	
+
       pn->set_UAP(uap);
       pn->set_NAP(nap);
       pn->set_offset(offset);
       //FIXME if this is a role switch, the offset can have an error of as
-      //much as 1.25 ms 
+      //much as 1.25 ms
     }
 
     /*

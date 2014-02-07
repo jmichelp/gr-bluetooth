@@ -4,7 +4,7 @@
 #
 # GNU Radio is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
-# the Free Software Foundation; either version 2, or (at your option)
+# the Free Software Foundation; either version 3, or (at your option)
 # any later version.
 #
 # GNU Radio is distributed in the hope that it will be useful,
@@ -21,7 +21,7 @@
 # Include swig generation macros
 ########################################################################
 find_package(SWIG)
-find_package(PythonLibs)
+find_package(PythonLibs 2)
 if(NOT SWIG_FOUND OR NOT PYTHONLIBS_FOUND)
     return()
 endif()
@@ -31,31 +31,28 @@ include(GrPython)
 ########################################################################
 # Setup swig generation
 ########################################################################
-foreach(incdir ${GNURADIO_CORE_INCLUDE_DIRS})
-    list(APPEND GR_SWIG_INCLUDE_DIRS ${incdir}/swig)
-endforeach(incdir)
-
-foreach(incdir ${GRUEL_INCLUDE_DIRS})
-    list(APPEND GR_SWIG_INCLUDE_DIRS ${incdir}/gruel/swig)
+foreach(incdir ${GNURADIO_RUNTIME_INCLUDE_DIRS})
+    list(APPEND GR_SWIG_INCLUDE_DIRS ${incdir}/gnuradio/swig)
 endforeach(incdir)
 
 set(GR_SWIG_LIBRARIES gnuradio-bluetooth btbb)
-set(GR_SWIG_DOC_FILE ${CMAKE_CURRENT_BINARY_DIR}/gr_bluetooth_doc.i)
+set(GR_SWIG_DOC_FILE ${CMAKE_CURRENT_BINARY_DIR}/gr_bluetooth_swig_doc.i)
 set(GR_SWIG_DOC_DIRS ${CMAKE_CURRENT_SOURCE_DIR}/../include)
 
-GR_SWIG_MAKE(gr_bluetooth gr_bluetooth.i)
+GR_SWIG_MAKE(swig gr_bluetooth_swig.i)
 
 ########################################################################
 # Install the build swig module
 ########################################################################
-GR_SWIG_INSTALL(TARGETS gr_bluetooth DESTINATION ${GR_PYTHON_DIR}/gr_bluetooth)
+GR_SWIG_INSTALL(TARGETS swig DESTINATION ${GR_PYTHON_DIR}/gr_bluetooth)
 
 ########################################################################
 # Install swig .i files for development
 ########################################################################
 install(
     FILES
-    gr_bluetooth.i
-    ${CMAKE_CURRENT_BINARY_DIR}/gr_bluetooth_doc.i
+    gr_bluetooth_swig.i
+    ${CMAKE_CURRENT_BINARY_DIR}/gr_bluetooth_swig_doc.i
     DESTINATION ${GR_INCLUDE_DIR}/gr_bluetooth/swig
 )
+
